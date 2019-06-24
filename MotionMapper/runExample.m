@@ -1,6 +1,6 @@
 %%example script that will run the code for a set of .avi files that are
 %%found in filePath
-
+clock
 %Place path to folder containing example .avi files here
 %PLACE PATH TO FOLDER CONTAINING BODY POSITION HERE
 filePath = 'data_mat/bpdata';
