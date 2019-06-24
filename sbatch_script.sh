@@ -9,4 +9,4 @@
 #SBATCH -e myerr_%j.err # Standard err goes to this filehostname
 
 module load matlab
-matlab -nodisplay -nodesktop -nosplash -nojvm -wait -log -r "run('MotionMapper/runExample.m'); save('workspace_data.mat', 'embeddingValues');  exit;"  | tail -n +11
+matlab -nodisplay -nodesktop -nosplash -nojvm -wait -log -r "run('MotionMapper/runExample.m'); save('../workspace_data.mat', 'embeddingValues');  exit;"  | tail -n +11
