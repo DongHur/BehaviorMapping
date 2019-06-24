@@ -1,3 +1,4 @@
 data/*
 MotionMapper/data/*
 *.m~
+.ipynb_checkpoints
