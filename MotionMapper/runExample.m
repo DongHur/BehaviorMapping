@@ -20,7 +20,7 @@ numZeros = ceil(log10(L+1e-10));
 %define any desired parameter changes here
 parameters.samplingFreq = 50;
 parameters.trainingSetSize = 1000;
-parameters.numProcessors = 2;
+parameters.numProcessors = 5;
 parameters.numPeriods = 25;
 parameters.omega0 = 5;
 parameters.minF = 1;
