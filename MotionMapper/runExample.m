@@ -37,13 +37,6 @@ fprintf(1, strcat("Number of Processor Used: ", numCoresString, '\n'));
 %initialize parameters
 parameters = setRunParameters(parameters);
 
-% Create a local cluster object
-pc = parcluster('local');
-% Start the matlabpool with one worker per core, make sure the workers don't time out if we don't
-% use them for a while
-p=parpool(pc, str2double(numCoresString));
-p.IdleTimeout=Inf;
-
 projectionsDirectory = [filePath];
 if ~exist(projectionsDirectory,'dir')
     mkdir(projectionsDirectory);
@@ -68,7 +61,5 @@ for i=1:L
 end
 
 clock
-poolobj = gcp('nocreate');
-delete(poolobj);
 close_parpool
 
