@@ -1,7 +1,7 @@
 #!/bin/bash
-#SBATCH -n 5 # Number of cores requested
+#SBATCH -J pfor
+#SBATCH -c 5 # Number of cores requested
 #SBATCH -N 1 # Ensure that all cores are on one machine
-#SBATCH --ntasks-per-node=5
 #SBATCH -t 30 # Runtime in minutes
 #SBATCH -p serial_requeue # Partition to submit to
 #SBATCH --mem=1000 # Memory per cpu in MB (see also --mem-per-cpu) 10GB
@@ -15,13 +15,10 @@ mkdir -p /scratch/$USER/46630138
 # Create results folder
 mkdir -p ~/BehaviorMapping/results/
 
-module load matlab
-matlab -nodisplay -nodesktop -nosplash <<EOF
+module load matlab/R2018b-fasrc01
+srun -c $SLURM_CPUS_PER_TASK matlab -nodisplay -nodesktop -nosplash <<EOF
 distcomp.feature( 'LocalUseMpiexec', false );
-pc = parcluster('local');
-pc.JobStorageLocation = ['/scratch/',getenv('USER'),'/46630138'];
-p = parpool(pc, 5);
-p.IdleTimeout = Inf;
+parpool('local', str2num(getenv('SLURM_CPUS_PER_TASK')));
 
 cd ~/BehaviorMapping/MotionMapper
 compile_mex_files
@@ -31,9 +28,7 @@ cd ~/BehaviorMapping/MotionMapper
 runExample;
 save('../results/workspace_data.mat', 'embeddingValues');  
 
-poolobj = gcp('nocreate');
-delete(poolobj);
-
+delete(gcp);
 exit;
 EOF
 
