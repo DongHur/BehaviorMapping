@@ -33,7 +33,7 @@ if isempty(numCoresString)
 else
     parameters.numProcessors=str2double(numCoresString);
 end
-fprintf(1, ["Number of Processor Used: ", numCoresString])
+fprintf(1, strcat("Number of Processor Used: ", numCoresString, '\n'));
 %initialize parameters
 parameters = setRunParameters(parameters);
 
