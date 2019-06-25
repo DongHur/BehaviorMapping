@@ -17,7 +17,6 @@ mkdir -p ~/BehaviorMapping/results/
 
 module load matlab/R2018b-fasrc01
 srun -c $SLURM_CPUS_PER_TASK matlab -nodisplay -nodesktop -nosplash <<EOF
-distcomp.feature( 'LocalUseMpiexec', false );
 parpool('local', str2num(getenv('SLURM_CPUS_PER_TASK')));
 
 cd ~/BehaviorMapping/MotionMapper
