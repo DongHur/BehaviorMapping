@@ -1,5 +1,6 @@
 #!/bin/bash
 #SBATCH -n 5 # Number of cores requested
+#SBATCH --ntasks-per-node=5
 #SBATCH -N 1 # Ensure that all cores are on one machine
 #SBATCH -t 30 # Runtime in minutes
 #SBATCH -p serial_requeue # Partition to submit to
