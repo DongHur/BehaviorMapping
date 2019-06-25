@@ -6,8 +6,8 @@
 #SBATCH -p serial_requeue # Partition to submit to
 #SBATCH --mem=1000 # Memory per cpu in MB (see also --mem-per-cpu) 10GB
 #SBATCH --open-mode=append
-#SBATCH -o myoutput_%j.out # Standard out goes to this file
-#SBATCH -e myerr_%j.err # Standard err goes to this filehostname
+#SBATCH -o results/myoutput_%j.out # Standard out goes to this file
+#SBATCH -e results/myerr_%j.err # Standard err goes to this filehostname
 
 module load matlab
-matlab -nodisplay -nodesktop -nosplash -nojvm -wait -log -r "run('MotionMapper/runExample.m'); save('../workspace_data.mat', 'embeddingValues');  exit;"  | tail -n +11
+matlab -nodisplay -nodesktop -nosplash -wait -log -r "run('MotionMapper/runExample.m'); save('../results/workspace_data.mat', 'embeddingValues');  exit;"  | tail -n +11

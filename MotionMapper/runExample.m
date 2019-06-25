@@ -20,13 +20,20 @@ numZeros = ceil(log10(L+1e-10));
 %define any desired parameter changes here
 parameters.samplingFreq = 50;
 parameters.trainingSetSize = 1000;
-parameters.numProcessors = 5;
 parameters.numPeriods = 25;
 parameters.omega0 = 5;
 parameters.minF = 1;
 parameters.maxF = 25;
 parameters.maxNeighbors = 30; % MUST BE LESS THAN SAMPLE
 parameters.perplexity = 28; % LESS THAN BERMAN'S 32
+
+numCoresString=getenv('SLURM_NTASKS_PER_NODE');
+if isempty(numCoresString)
+    parameters.numProcessors=2;  % just use a default value outside SLURM
+else
+    parameters.numProcessors=str2double(numCoresString);
+end
+fprintf(1, ["Number of Processor Used: ", numCoresString])
 %initialize parameters
 parameters = setRunParameters(parameters);
 
