@@ -17,6 +17,7 @@ mkdir -p ~/BehaviorMapping/results/
 
 module load matlab
 matlab -nodisplay -nodesktop -nosplash <<EOF
+distcomp.feature( 'LocalUseMpiexec', false );
 pc = parcluster('local');
 pc.JobStorageLocation = ['/scratch/',getenv('USER'),'/46630138'];
 p = parpool(pc, 5);
