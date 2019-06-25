@@ -1,3 +1,4 @@
+parpool('local', str2num(getenv('SLURM_CPUS_PER_TASK')))
 %%example script that will run the code for a set of .avi files that are
 %%found in filePath
 clock
@@ -60,6 +61,7 @@ for i=1:L
     clear projections
 end
 
+delete(gcp);
 clock
 close_parpool
 
