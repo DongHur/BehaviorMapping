@@ -3,3 +3,4 @@ MotionMapper/data_mat/*
 *.m~
 .ipynb_checkpoints
 results/*
+MotionMapper/figure/*
