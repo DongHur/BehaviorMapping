@@ -1,4 +1,15 @@
 %% Make density plots
+%load data
+load("../results/data5_workspace_data.mat")
+%add utilities folder to path
+
+addpath(genpath('./utilities/'));
+addpath(genpath('./PCA/'));
+addpath(genpath('./segmentation_alignment/'));
+addpath(genpath('./t_sne/'));
+addpath(genpath('./wavelet/'));
+
+L = length(embeddingValues); 
 maxVal = max(max(abs(combineCells(embeddingValues))));
 maxVal = round(maxVal * 1.1);
 

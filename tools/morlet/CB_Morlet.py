@@ -73,6 +73,8 @@ class Morlet():
         self.df_data = None 
         self.data = None
         self.power_bp = None
+        self.trans_data = None
+        self.rot_data = None
     def import_data(self, data_path):
         # Import Data
         self.filename=os.path.splitext(os.path.basename(data_path))[0]
@@ -84,14 +86,18 @@ class Morlet():
         time_length = len(self.df_data) # t
         self.data = np.swapaxes(self.df_data.reshape((time_length,30,3)).T,0,1) # 30 x 3 x t
         # MAKE POINT 2 ORIGIN
-        self.data[:,0:2,:] = self.data[:,0:2,:] - self.data[2,0:2,:]
+        self.trans_data = np.copy(self.data[2,0:2,:])
+        self.data[:,0:2,:] = self.data[:,0:2,:] - self.trans_data
         # COMPUTE THE CENTER OF AXIS & ANGLE
         axis_vector = self.data[1,:,:]
-        axis_angle_deviation = np.sign(axis_vector[0,:])*np.pi/2-np.arctan(axis_vector[1,:]/axis_vector[0,:])
+        self.rot_data = np.sign(axis_vector[0,:])*np.pi/2-np.arctan(axis_vector[1,:]/axis_vector[0,:])
         # ROTATE ALL DATA POINT
         for i in range(30):
-            self.data[i,0:2,:] = self.Rotate(self.data[i,0:2,:], axis_angle_deviation)
+            self.data[i,0:2,:] = self.Rotate(self.data[i,0:2,:], self.rot_data)
+        # SAVE DATA
         np.save(bp_datapath+"/"+self.filename, self.data)
+        np.save(bp_datapath+"/trans_"+self.filename, self.trans_data)
+        np.save(bp_datapath+"/rot_"+self.filename, self.rot_data)
         pass
     def Rotate(self, data, angle):
         return np.einsum('ijk,jk ->ik', np.array([[np.cos(angle), -1*np.sin(angle)],
