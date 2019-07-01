@@ -57,9 +57,11 @@ def ajust_data(num_bp=30, origin_bp=2, axis_bp=1):
 	    cam_path = glob2.glob(data_path+'/*.npy')[0]
 	    cam_data = np.load(cam_path)
 	    # translate data w/ respect to origin
-	    (bp_data, trans_data) = transform.translational(bp_data, origin_bp)
+	    # (bp_data, trans_data) = transform.translational(bp_data, origin_bp)
+	    (bp_data, trans_data) = translational(bp_data, origin_bp)
 	    # rotate data w/ respect to body axis
-	    (bp_data, rot_data) = transform.rotational(bp_data, axis_bp)
+	    # (bp_data, rot_data) = transform.rotational(bp_data, axis_bp)
+	    (bp_data, rot_data) = rotational(bp_data, axis_bp)
 	    # visualize transformed body points
 	    # visualize.ant_bp_graph(bp_data, frame=600)
 	    
