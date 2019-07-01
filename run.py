@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import os
 import sys
 # supplement
-from tqdm import tqdm, tqdm_notebook
+# from tqdm import tqdm, tqdm_notebook
 import scipy.io as sio
 import glob2
 # tools
