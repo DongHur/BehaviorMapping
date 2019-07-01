@@ -7,7 +7,7 @@ import sys
 # supplement
 from tqdm import tqdm, tqdm_notebook
 import scipy.io as sio
-import glob 
+import glob2
 # tools
 from tools import transform, visualize
 
@@ -18,13 +18,13 @@ def ajust_data(num_bp=30, origin_bp=2, axis_bp=1):
 	# axis_bp -  other body point to form an axis w/ origin body point
 	# delete_bp - should always delete origin bp; can add other bp to list
 
-	data_path_list = glob.glob('data/*')
+	data_path_list = glob2.glob('data/*')
 	delete_bp=(origin_bp)
 	for data_path in data_path_list:
 	    dir_name = os.path.basename(data_path) # specific directory name in data folder
 	    
 	    # convert body point h5 to numpy
-	    bp_path = glob.glob(data_path+'/*.h5')[0]
+	    bp_path = glob2.glob(data_path+'/*.h5')[0]
 	    bp_h5data = pd.read_hdf(bp_path)
 	    bp_data = bp_h5data[ bp_h5data.keys().levels[0][0] ].values # converts h5 to npy
 	    # reformat numpy body point data
@@ -32,7 +32,7 @@ def ajust_data(num_bp=30, origin_bp=2, axis_bp=1):
 	    bp_data = np.delete( bp_data.reshape( num_frame,num_bp,-1 ), obj=-1, axis=2 ) # reformats data and takes out last prob varaiable
 	    bp_data = np.swapaxes(bp_data.T,0,1) # num_bp x num_coord x t
 	    # get camera position
-	    cam_path = glob.glob(data_path+'/*.npy')[0]
+	    cam_path = glob2.glob(data_path+'/*.npy')[0]
 	    cam_data = np.load(cam_path)
 	    # translate data w/ respect to origin
 	    (bp_data, trans_data) = transform.translational(bp_data, origin_bp)
