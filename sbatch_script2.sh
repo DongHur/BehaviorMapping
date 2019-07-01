@@ -13,10 +13,5 @@
 # if you ask for a certain number of cores, the memory size also has to match a minimum amount
 # 8 cores need at least 10G
 
-module load python/2.7.14-fasrc01
-conda create -n behavior --clone $PYTHON_HOME
-source activate behavior
-source deactivate
-
 module load matlab/R2018b-fasrc01
 srun -c $SLURM_CPUS_PER_TASK matlab -nodisplay -nodesktop -nosplash -r "run('MotionMapper/runExample.m'); exit;"
