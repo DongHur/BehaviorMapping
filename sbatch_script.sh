@@ -5,7 +5,7 @@
 #SBATCH -t 30 # Runtime in minutes
 #SBATCH -p serial_requeue # Partition to submit to
 #SBATCH --mem=10G # Memory per cpu in MB (see also --mem-per-cpu)
-#SBATCH -o logs/%j/myoutput_%j.out # Standard out goes to this file
+#SBATCH -o logs/%j/myoutput_%j.out #Standard out goes to this file
 #SBATCH -e logs/%j/myerr_%j.err # Standard err goes to this filehostname
 
 
