@@ -13,4 +13,4 @@ module load Anaconda3/5.0.1-fasrc02
 python run.py
 
 module load matlab/R2018b-fasrc01
-srun -c $SLURM_CPUS_PER_TASK matlab -nodisplay -nodesktop -nosplash -r "run('MotionMapper/runExample.m'); save('results/workspace_data.mat', 'embeddingValues');  exit;"
+srun -c $SLURM_CPUS_PER_TASK matlab -nodisplay -nodesktop -nosplash -r "run('MotionMapper/runExample.m');  exit;"

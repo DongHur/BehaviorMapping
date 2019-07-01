@@ -1,10 +1,8 @@
+%uncomment when running on odyssey
 parpool('local', str2num(getenv('SLURM_CPUS_PER_TASK')))
-%%example script that will run the code for a set of .avi files that are
-%%found in filePath
 clock
-%Place path to folder containing example .avi files here
 %PLACE PATH TO FOLDER CONTAINING BODY POSITION HERE
-filePath = 'data_mat/bpdata';
+filePath = '../data/'
 
 %add utilities folder to path
 addpath(genpath('./utilities/'));
@@ -14,7 +12,8 @@ addpath(genpath('./t_sne/'));
 addpath(genpath('./wavelet/'));
 
 %find all avi files in 'filePath'
-imageFiles = findAllImagesInFolders(filePath,'.mat');
+% make sure to have MAT in front of .mat filename
+imageFiles = findAllImagesInFolders(filePath,'.mat', 'MAT');
 L = length(imageFiles);
 numZeros = ceil(log10(L+1e-10));
 
@@ -35,6 +34,7 @@ else
     parameters.numProcessors=str2double(numCoresString);
 end
 fprintf(1, strcat("Number of Processor Used: ", numCoresString, '\n'));
+
 %initialize parameters
 parameters = setRunParameters(parameters);
 
@@ -58,6 +58,10 @@ for i=1:L
     load(projectionFiles{i},'projections');
     projections = projections(:,1:parameters.pcaModes);
     [embeddingValues{i},~] = findEmbeddings(projections,trainingSetData,trainingEmbedding,parameters);
+    % save corresponding files data
+    embed_values_i = embeddingValues{i}
+    dir_part = strsplit(string(imageFiles{i}), '/');
+    save([dir_part{1} '/' dir_part{2} '/' dir_part{3} '/EMBED.mat'], 'embed_values_i');
     clear projections
 end
 
