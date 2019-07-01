@@ -4,12 +4,12 @@
 #SBATCH -N 1 # Ensure that all cores are on one machine
 #SBATCH -t 30 # Runtime in minutes
 #SBATCH -p serial_requeue # Partition to submit to
-#SBATCH --mem=10G # Memory per cpu in MB (see also --mem-per-cpu)
-#SBATCH -o logs/%j/myoutput_%j.out #Standard out goes to this file
-#SBATCH -e logs/%j/myerr_%j.err # Standard err goes to this filehostname
+#SBATCH --mem=1G # Memory per cpu in MB (see also --mem-per-cpu)
+#SBATCH -o logs/myoutput_%j.out #Standard out goes to this file
+#SBATCH -e logs/myerr_%j.err # Standard err goes to this filehostname
 
 
-module load Anaconda3/5..1-fasrc02
+module load Anaconda/5.0.1-fasrc02
 python run.py
 
 module load matlab/R2018b-fasrc01
