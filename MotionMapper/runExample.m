@@ -1,4 +1,3 @@
-%uncomment when running on odyssey
 parpool('local', str2num(getenv('SLURM_CPUS_PER_TASK')))
 clock
 %PLACE PATH TO FOLDER CONTAINING BODY POSITION HERE
