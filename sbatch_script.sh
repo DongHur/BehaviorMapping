@@ -7,7 +7,8 @@
 #SBATCH --mem=1G # Memory per cpu in MB (see also --mem-per-cpu)
 #SBATCH -o logs/myoutput_%j.out #Standard out goes to this file
 #SBATCH -e logs/myerr_%j.err # Standard err goes to this filehostname
-
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=dhur@college.harvard.edu
 
 module load Anaconda/5.0.1-fasrc02
 python run.py
