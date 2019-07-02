@@ -18,13 +18,13 @@ numZeros = ceil(log10(L+1e-10));
 
 %define any desired parameter changes here
 parameters.samplingFreq = 50;
-parameters.trainingSetSize = 1000;
+parameters.trainingSetSize = 35000; % previously 1000
 parameters.numPeriods = 25;
 parameters.omega0 = 5;
 parameters.minF = 1;
 parameters.maxF = 25;
-parameters.maxNeighbors = 30; % MUST BE LESS THAN SAMPLE
-parameters.perplexity = 28; % LESS THAN BERMAN'S 32
+parameters.maxNeighbors = 200; % MUST BE LESS THAN SAMPLE; previously 30
+parameters.perplexity = 32; % LESS THAN BERMAN'S 32; previously 28
 
 numCoresString=getenv('SLURM_NTASKS_PER_NODE');
 if isempty(numCoresString)
