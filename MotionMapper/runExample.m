@@ -27,6 +27,10 @@ parameters.maxNeighbors = 200; % MUST BE LESS THAN SAMPLE; previously 30
 parameters.perplexity = 32; % LESS THAN BERMAN'S 32; previously 28
 
 numCoresString=getenv('SLURM_NTASKS_PER_NODE');
+numCoresString2=getenv('SLURM_CPUS_PER_TASK');
+fprintf(1, "**************");
+fprintf(1, string(numCoresString));
+fprintf(1, string(numCoresString2));
 if isempty(numCoresString)
     parameters.numProcessors=2;  % just use a default value outside SLURM
 else
