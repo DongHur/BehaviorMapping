@@ -8,3 +8,6 @@ figure/*
 **/__pycache__/**
 **/**/__pycache__/**
 logs/*
+data_result/*
+**/.DS_Store
+notes.txt

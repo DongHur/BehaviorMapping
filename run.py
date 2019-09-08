@@ -67,7 +67,7 @@ def ajust_data(num_bp=30, origin_bp=2, axis_bp=1):
         # visualize.ant_bp_graph(bp_data, frame=600)
         
         # delete unwanted body points
-        bp_mod = np.delete( bp_data,delete_bp,0 )
+        bp_mod = np.delete( bp_data,delete_bp, 0)
         # reshape body point to [N_frame x features] for spectrogram
         num_relevant_bp, num_axis = bp_mod.shape[0], bp_mod.shape[1]
         bp_data_mod = bp_mod.reshape( num_relevant_bp*num_axis,-1 ).T 
