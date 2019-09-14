@@ -1,0 +1,2 @@
+* notes for clustering
+- DBSCAN: https://blog.dominodatalab.com/topology-and-density-based-clustering/
