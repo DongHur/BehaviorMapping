@@ -6,8 +6,6 @@ from sklearn.neighbors import KernelDensity
 from sklearn.model_selection import GridSearchCV
 from sklearn.neighbors import NearestNeighbors
 import seaborn as sns
-# from debacl import geom_tree as gtree
-# import debacl 
 import hdbscan
 import os
 import matplotlib
@@ -19,7 +17,8 @@ from collections import Counter
 def collect_data(num_files=5):
     data = None
     count = 0
-    for root, dirs, files in os.walk("./data_result/data_final"):
+    file_info = {}
+    for root, dirs, files in os.walk("./data_result/sbatch_script1_25perc"):
         # print("root: ", root); print("dirs: ", dirs); print("files: ", files)
         
         if "EMBED.mat" in files:
@@ -28,11 +27,13 @@ def collect_data(num_files=5):
             data_i = sio.loadmat(root+"/EMBED.mat")['embed_values_i']
             data = np.vstack((data, data_i)) if data is not None else data_i
             count += 1
+            # save file information
+            file_info[root] = data_i.shape[0]
         if count == num_files:
             break
     print(":: Number of files were loaded: ", count)
     print(":: Shape of Data: ", data.shape)
-    return data
+    return data, file_info
 def sklearn_kmeans_clustering(data, start_n, stop_n):
     inertia = []
     for n_clusters in range(start_n, stop_n):
@@ -128,38 +129,12 @@ def sklearn_optics_clustering(data, mode="all", select_idx=None, metric='euclide
         plt.xlim(-150,150)
         plt.ylim(-150,150)
     pass
-def debacl_clustering(data):
-    # (n,p) = data.shape
-    # # Smoothing Parameter, Pruning Parameter
-    # p_k, p_gamma = 0.005, 0.05
-    # # Modify parameters based on number of data points
-    # k, gamma = int(n*p_k), int(n*p_gamma)
-    # # Perform clustering
-    # print("here 1")
-    # tree = debacl.construct_tree(data, k=k, prune_threshold=gamma)
-    # # tree = gtree.geomTree(data, k, gamma, n_grid = None, verbose = False)
-    # print(tree)
-    # print("here 2")
-    # # plot
-    # fig = tree.plot()
-    # print("here 3")
-    # uc, nodes = tree.getClusterLabels(method = "all-mode")
-    # print("here 4")
-    # fig, ax = debacl.utils.plotForeground(data, uc, fg_alpha = 0.95, bg_alpha = 0.1, edge_alpha = 0.6, s = 60)
-    # print("here 5")
-    pass
 
 def sklearn_kde(data, kernel="gaussian", center=None):
     xmin, xmax = np.min(data[:,0]), np.max(data[:,0])
     ymin, ymax = np.min(data[:,1]), np.max(data[:,1])
     X, Y = np.mgrid[xmin:xmax:100j,ymin:ymax:100j]
     position = np.vstack([X.flatten(), Y.flatten()]).T
-
-    # determine kernel metadata; Takes awhile; do important sampling and run only on a subset; don't run everytime
-    # grid = GridSearchCV(KernelDensity(), {'bandwidth': np.linspace(0.1, 1.0, 30)}, cv=20) # 20-fold cross-validation
-    # grid.fit(data)
-    # bandwidth = grid.best_params_['bandwidth']
-    # print("bandwidth: ", bandwidth)
     
     # gaussian kernel
     bandwidth = 2
@@ -179,10 +154,10 @@ def histogram(data, num_bins=50):
 
 # https://towardsdatascience.com/lightning-talk-clustering-with-hdbscan-d47b83d1b03a
 # https://umap-learn.readthedocs.io/en/latest/clustering.html
-def hdbscan_clustering(data, min_cluster_size=10, plot_cluster=False, plot_cluster_noiseless=True, 
+def hdbscan_clustering(data, min_cluster_size=140, min_samples=30, plot_cluster=False, plot_cluster_noiseless=True, 
     plot_span_tree=False, plot_linkage_tree=False, plot_condense_tree=False):
     # data - [num_frames, num_dim]
-    clusterer = hdbscan.HDBSCAN(min_cluster_size=140, min_samples=30, allow_single_cluster=False, gen_min_span_tree=True)
+    clusterer = hdbscan.HDBSCAN(min_cluster_size=min_cluster_size, min_samples=min_samples, allow_single_cluster=False, gen_min_span_tree=True)
     clusterer.fit(data)
     # plot figures
     if plot_span_tree:
@@ -207,13 +182,26 @@ def hdbscan_clustering(data, min_cluster_size=10, plot_cluster=False, plot_clust
     # plot figures
     if plot_cluster:
         plt.figure("Labelled Scatter Plot")
+        plt.title("Labelled Scatter Plot")
+        plt.xlabel("X1")
+        plt.ylabel("X2")
         plt.scatter(data[:,0], data[:,1], s=1.5, c=cluster_member_colors, alpha=0.3)
     if plot_cluster_noiseless:
         plt.figure("Noiseless Labelled Scatter Plot")
+        plt.title("Labelled Scatter Plot w/o Noise")
+        plt.xlabel("X1")
+        plt.ylabel("X2")
         idx = clusterer.labels_ != -1
         plt.scatter(data[idx,0], data[idx,1], s=1.5, c=cluster_member_colors[idx], alpha=0.3)
     # plt.savefig(FIG_PATH+"Labelled Scatter Plot")
     return clusterer.labels_, clusterer.probabilities_ 
+
+def ethogram(label, prob):
+    x_range = (100,2000)
+    plt.figure("Ethogram")
+    plt.imshow([ label[x_range[0]:x_range[1]] ], aspect='auto')
+    plt.gca().get_yaxis().set_visible(False)
+    pass
 
 def gaussian_conv(data, k_nearest=5, num_points=120, plot_kernel=False, plot_hist=False, plot_conv=True):
     # data - [num_frames, num_dim]
@@ -262,9 +250,17 @@ def gaussian_conv(data, k_nearest=5, num_points=120, plot_kernel=False, plot_his
         plt.ylabel("X2")
     pass
 
+def save_clusters(label, prob, file_info):
+    idx = 0
+    for key, value in file_info.items():
+        # print(key)
+        # print(value)
+        np.save(key+"/cluster.npy", label[idx:idx+value])
+        idx += value
+    pass
 
 if __name__ == "__main__":
-    data = collect_data(num_files=-1)
+    data, file_info = collect_data(num_files=-1)
     start_time = time.time()
     if False:
         histogram(data, num_bins=100)
@@ -284,10 +280,14 @@ if __name__ == "__main__":
         debacl_clustering(data)
         print(":: Finished debacl: {}".format(round(time.time()-start_time, 2)))
     if True:
-        hdbscan_clustering(data, min_cluster_size=29, 
+        cluster_label, cluster_prob = hdbscan_clustering(data,  min_cluster_size=140, min_samples=30, plot_cluster=False, plot_cluster_noiseless=True,
             plot_span_tree=False, plot_linkage_tree=False, plot_condense_tree=False)
+        # ethogram(cluster_label, cluster_prob)
         print(":: Finished HDBSCAN: {}".format(round(time.time()-start_time, 2)))
-    if True:
+    if False:
         gaussian_conv(data)
         print(":: Finished Gausian Convolution: {}".format(round(time.time()-start_time, 2)))
+    if True:
+        save_clusters(cluster_label, cluster_prob, file_info)
+        print(":: Finished Saving Cluster: {}".format(round(time.time()-start_time, 2)))
     plt.show()
