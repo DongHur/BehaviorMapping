@@ -13,12 +13,13 @@ import matplotlib.pyplot as plt
 import matplotlib.colors  as colors
 import timeit
 from collections import Counter
+from tqdm import tqdm
 
-def collect_data(num_files=5):
+def collect_data(filepath, num_files=-1):
     data = None
     count = 0
     file_info = {}
-    for root, dirs, files in os.walk("./data_result/sbatch_script1_25perc"):
+    for root, dirs, files in os.walk(filepath):
         # print("root: ", root); print("dirs: ", dirs); print("files: ", files)
         
         if "EMBED.mat" in files:
@@ -154,6 +155,41 @@ def histogram(data, num_bins=50):
 
 # https://towardsdatascience.com/lightning-talk-clustering-with-hdbscan-d47b83d1b03a
 # https://umap-learn.readthedocs.io/en/latest/clustering.html
+def optimal_hdbscan(data, num_mcs=50, num_ms=40):
+    print(data.shape)
+    mcs_list = np.linspace(10,300,num_mcs, dtype=int)
+    ms_list = np.linspace(5,70,num_ms, dtype=int)
+    XX, YY = np.meshgrid(mcs_list, ms_list)
+    # compute hdbscan result
+    num_cluster=np.zeros((num_mcs, num_ms))
+    perc_label=np.zeros((num_mcs, num_ms))
+    for mcs_i, mcs in tqdm(enumerate(mcs_list)):
+        for ms_i, ms in enumerate(ms_list):
+            clusterer = hdbscan.HDBSCAN(
+                min_cluster_size=int(mcs), 
+                min_samples=int(ms), 
+                allow_single_cluster=False)
+            clusterer.fit(data)
+            num_cluster[mcs_i, ms_i] = int(clusterer.labels_.max()+1)
+            perc_label[mcs_i, ms_i] = 100*len(np.where(clusterer.labels_!=-1)[0])/len(clusterer.labels_)
+    print(num_cluster)
+    print(perc_label)
+    np.save("./num_cluster.npy", num_cluster)
+    np.save("./perc_label.npy", perc_label)
+    if False:
+        plt.figure("Optimal HDBSCAN Plane Number of Cluster")
+        plt.pcolormesh(XX, YY, num_cluster, cmap="jet")
+        plt.title("Number of Cluster")
+        plt.xlabel("min_cluster_size")
+        plt.ylabel("min_samples")
+    if False:
+        plt.figure("Optimal HDBSCAN Plane Percent Labelled")
+        plt.pcolormesh(XX, YY, perc_label, cmap="jet")
+        plt.title("Percent Labelled")
+        plt.xlabel("min_cluster_size")
+        plt.ylabel("min_samples")
+    pass
+
 def hdbscan_clustering(data, min_cluster_size=140, min_samples=30, plot_cluster=False, plot_cluster_noiseless=True, 
     plot_span_tree=False, plot_linkage_tree=False, plot_condense_tree=False):
     # data - [num_frames, num_dim]
@@ -175,6 +211,7 @@ def hdbscan_clustering(data, min_cluster_size=140, min_samples=30, plot_cluster=
     # control density of color based on probability
     num_cluster = int(clusterer.labels_.max()+1)
     print("Number of Clusters: ", num_cluster)
+    print("Points Classified: {}%".format(round(len(np.where(clusterer.labels_!=-1)[0])/len(clusterer.labels_)*100,2)))
     # format cluster color
     color_palette = sns.color_palette('hls', num_cluster)
     cluster_colors = [color_palette[x] if x >= 0 else (0.5, 0.5, 0.5) for x in clusterer.labels_]
@@ -196,21 +233,14 @@ def hdbscan_clustering(data, min_cluster_size=140, min_samples=30, plot_cluster=
     # plt.savefig(FIG_PATH+"Labelled Scatter Plot")
     return clusterer.labels_, clusterer.probabilities_ 
 
-def ethogram(label, prob):
-    x_range = (100,2000)
-    plt.figure("Ethogram")
-    plt.imshow([ label[x_range[0]:x_range[1]] ], aspect='auto')
-    plt.gca().get_yaxis().set_visible(False)
-    pass
-
-def gaussian_conv(data, k_nearest=5, num_points=120, plot_kernel=False, plot_hist=False, plot_conv=True):
+def gaussian_conv(data, k_nearest=5, num_points=250, plot_kernel=False, plot_hist=False, plot_conv=True):
     # data - [num_frames, num_dim]
     # knn computation
     nbrs = NearestNeighbors(n_neighbors=k_nearest+1, algorithm='kd_tree').fit(data)
     K_dist, K_idx = nbrs.kneighbors(data)
     K_matrix_idx = nbrs.kneighbors_graph(data).toarray()
     # gaussian conv computation
-    sigma = np.median(K_dist[:,-1])
+    sigma = np.median(K_dist[:,-1])*5.0
     print("sigma: ", sigma)
     L_bound = -1.0*abs(data.max())-1
     U_bound = 1.0*abs(data.max())+1
@@ -243,12 +273,13 @@ def gaussian_conv(data, k_nearest=5, num_points=120, plot_kernel=False, plot_his
     GH_conv[GH_conv<0] = 0
     if plot_conv:
         plt.figure("Gaussian Convolution")
-        plt.pcolormesh(X_H, Y_H, GH_conv.T)
+        plt.pcolormesh(X_H, Y_H, GH_conv.T, cmap="jet")
         # plt.imshow(GH_conv, extent=[L_bound, U_bound, L_bound, U_bound])
         plt.title("Gaussian Kernel Convolution w/ Data Histogram")
         plt.xlabel("X1")
         plt.ylabel("X2")
     pass
+
 
 def save_clusters(label, prob, file_info):
     idx = 0
@@ -260,8 +291,26 @@ def save_clusters(label, prob, file_info):
     pass
 
 if __name__ == "__main__":
-    data, file_info = collect_data(num_files=-1)
+    # filepath = "./data_result/sbatch_script1_25perc"
+    filepath = "./data_result/data_final"
+    data, file_info = collect_data(filepath)
     start_time = time.time()
+    # *** HDBSCAN Parameter ***
+    # old data
+    # min_cluster_size, min_samples = 185, 28
+    # Number of Clusters:  55
+    # Points Classified: 79.77%
+    # new data
+    # min_cluster_size, min_samples = 185, 28
+    # Number of Clusters:  55
+    # Points Classified: 79.77%
+    min_cluster_size=170 
+    min_samples=30 
+    plot_cluster, plot_cluster_noiseless = False, True
+    plot_linkage_tree, plot_condense_tree = False, False
+    plot_span_tree = False
+    
+    
     if False:
         histogram(data, num_bins=100)
         print(":: Finished Histogram: {}".format(round(time.time()-start_time, 2)))
@@ -280,14 +329,15 @@ if __name__ == "__main__":
         debacl_clustering(data)
         print(":: Finished debacl: {}".format(round(time.time()-start_time, 2)))
     if True:
-        cluster_label, cluster_prob = hdbscan_clustering(data,  min_cluster_size=140, min_samples=30, plot_cluster=False, plot_cluster_noiseless=True,
-            plot_span_tree=False, plot_linkage_tree=False, plot_condense_tree=False)
-        # ethogram(cluster_label, cluster_prob)
+        optimal_hdbscan(data)
+    if False:
+        cluster_label, cluster_prob = hdbscan_clustering(data,  min_cluster_size, min_samples, plot_cluster, plot_cluster_noiseless,
+            plot_span_tree, plot_linkage_tree, plot_condense_tree)
         print(":: Finished HDBSCAN: {}".format(round(time.time()-start_time, 2)))
     if False:
         gaussian_conv(data)
         print(":: Finished Gausian Convolution: {}".format(round(time.time()-start_time, 2)))
-    if True:
+    if False:
         save_clusters(cluster_label, cluster_prob, file_info)
         print(":: Finished Saving Cluster: {}".format(round(time.time()-start_time, 2)))
     plt.show()
