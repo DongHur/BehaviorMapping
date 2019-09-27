@@ -12,9 +12,10 @@
 # if you ask for a certain number of cores, the memory size also has to match a minimum amount
 # 8 cores need at least 10G
 
-module load Anaconda/5.0.1-fasrc02
-conda create -n behavior --clone $PYTHON_HOME
-source activate behavior
+# module load Anaconda/5.0.1-fasrc02
+# conda create -n behavior --clone $PYTHON_HOME
+cd /n/home03/dhur/BehaviorMapping
+source env/bin/activate
 python cluster.py
 source deactivate
 
