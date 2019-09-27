@@ -14,8 +14,9 @@
 
 # module load Anaconda/5.0.1-fasrc02
 # conda create -n behavior --clone $PYTHON_HOME
-cd /n/home03/dhur/BehaviorMapping
-source env/bin/activate
+RUNPATH=/n/home03/dhur/BehaviorMapping
+cd $RUNPATH
+source $HOME/env/bin/activate
 python cluster.py
 source deactivate
 
