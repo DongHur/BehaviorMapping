@@ -291,7 +291,7 @@ def save_clusters(label, prob, file_info):
     pass
 
 if __name__ == "__main__":
-    # filepath = "./data_result/sbatch_script1_25perc"
+    # filepath = "./data"
     filepath = "./data_result/data_final"
     data, file_info = collect_data(filepath)
     start_time = time.time()
