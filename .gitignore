@@ -10,3 +10,4 @@ figure/*
 logs/*
 data_result/*
 **/.DS_Store
+env/
