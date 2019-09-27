@@ -304,8 +304,8 @@ if __name__ == "__main__":
     # min_cluster_size, min_samples = 185, 28
     # Number of Clusters:  55
     # Points Classified: 79.77%
-    min_cluster_size=170 
-    min_samples=30 
+    min_cluster_size=175 
+    min_samples=22 
     plot_cluster, plot_cluster_noiseless = False, True
     plot_linkage_tree, plot_condense_tree = False, False
     plot_span_tree = False
@@ -328,13 +328,13 @@ if __name__ == "__main__":
     if False:
         debacl_clustering(data)
         print(":: Finished debacl: {}".format(round(time.time()-start_time, 2)))
-    if True:
-        optimal_hdbscan(data)
     if False:
+        optimal_hdbscan(data)
+    if True:
         cluster_label, cluster_prob = hdbscan_clustering(data,  min_cluster_size, min_samples, plot_cluster, plot_cluster_noiseless,
             plot_span_tree, plot_linkage_tree, plot_condense_tree)
         print(":: Finished HDBSCAN: {}".format(round(time.time()-start_time, 2)))
-    if False:
+    if True:
         gaussian_conv(data)
         print(":: Finished Gausian Convolution: {}".format(round(time.time()-start_time, 2)))
     if False:
