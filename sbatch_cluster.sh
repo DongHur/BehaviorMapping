@@ -13,9 +13,8 @@
 # 8 cores need at least 10G
 
 module load Anaconda/5.0.1-fasrc02
-conda create -n behavior --clone $PYTHON_HOME
+conda create -n behavior python=3.6 hdbscan
 source activate behavior
-pip install hdbscan
 python cluster.py
 source deactivate
 
