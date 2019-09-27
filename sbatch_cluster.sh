@@ -15,6 +15,7 @@
 module load Anaconda/5.0.1-fasrc02
 conda create -n behavior --clone $PYTHON_HOME
 source activate behavior
+pip install hdbscan
 python cluster.py
 source deactivate
 
