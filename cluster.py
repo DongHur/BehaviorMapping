@@ -1,7 +1,7 @@
 import numpy as np
 import time
 import scipy.io as sio
-from sklearn.cluster import KMeans, DBSCAN, OPTICS
+from sklearn.cluster import KMeans, DBSCAN
 from sklearn.neighbors import KernelDensity
 from sklearn.model_selection import GridSearchCV
 from sklearn.neighbors import NearestNeighbors
@@ -69,63 +69,6 @@ def sklearn_dbscan_clustering(data, mode="core", select_idx=None, metric='euclid
         plt.ylim(-150,150)
     if mode=="select" and select_idx!=None:
         outlier_idx = np.where(dbsc.labels_ == select_idx)
-        plt.scatter(data[outlier_idx,0], data[outlier_idx,1], s=1)
-        plt.xlim(-150,150)
-        plt.ylim(-150,150)
-    pass
-def sklearn_optics_clustering(data, mode="all", select_idx=None, metric='euclidean'):
-    # metric: [cityblock, cosine, euclidean, l1, l2, manhattan]
-    optics = OPTICS(max_eps=100, min_samples=5, xi=0.03, algorithm="kd_tree", metric=metric).fit(data)
-    c = Counter(optics.labels_)
-    num_cluster = len(c)
-    print(c.items())
-    print("Number of Clusters: ", num_cluster)
-    print(optics.cluster_hierarchy_)
-    # dendrogram plot
-    # reach_dist = optics.reachability_[optics.ordering_]
-    # max_reachability = np.max(reach_dist[np.isreal(reach_dist)])
-    # reach_dist[np.isinf(reach_dist)] = max_reachability*1.5
-    # plt.plot(np.arange(len(reach_dist)), reach_dist, alpha=0.3)
-
-    # ax = plt.subplot(1,1,1)
-    # space = np.arange(len(reach_dist))
-    # for klass in range(0, num_cluster):
-    #     Xk = space[optics.labels_ == klass]
-    #     Rk = reach_dist[optics.labels_ == klass]
-    #     ax.scatter(Xk, Rk, alpha=0.3)
-    # # scatter and label plot
-    if mode=="all":
-        plt.subplot(131)
-        ax1=plt.subplot(1, 3, 1)
-        ax2=plt.subplot(1, 3, 2)
-        ax3=plt.subplot(1, 3, 3)
-
-        ax1.scatter(data[:,0], data[:,1], c=optics.labels_, s=1)
-        ax1.set_xlim(-150,150)
-        ax1.set_ylim(-150,150)
-
-        for klass in range(0, num_cluster):
-            datak = data[optics.labels_ == klass]
-            ax2.plot(datak[:, 0], datak[:, 1], alpha=0.3)
-        ax2.set_xlim(-150,150)
-        ax2.set_ylim(-150,150)
-
-        outlier_idx = np.where(optics.labels_ == -1)
-        ax3.scatter(data[outlier_idx,0], data[outlier_idx,1], s=1)
-        ax3.set_xlim(-150,150)
-        ax3.set_ylim(-150,150)
-    if mode=="core":
-        ax = plt.subplot()
-        for klass in range(0, num_cluster):
-            datak = data[optics.labels_ == klass]
-            ax.plot(datak[:, 0], datak[:, 1], alpha=0.3)
-    if mode=="outlier":
-        outlier_idx = np.where(optics.labels_ == -1)
-        plt.scatter(data[outlier_idx,0], data[outlier_idx,1], s=1)
-        plt.xlim(-150,150)
-        plt.ylim(-150,150)
-    if mode=="select" and select_idx!=None:
-        outlier_idx = np.where(optics.labels_ == select_idx)
         plt.scatter(data[outlier_idx,0], data[outlier_idx,1], s=1)
         plt.xlim(-150,150)
         plt.ylim(-150,150)
@@ -322,9 +265,6 @@ if __name__ == "__main__":
         sklearn_dbscan_clustering(data, mode="core")
         # sklearn_dbscan_clustering(data, mode="select", select_idx=147)
         print(":: Finished DBSCAN: {}".format(round(time.time()-start_time, 2)))
-    if False: 
-        sklearn_optics_clustering(data, mode="all")
-        print(":: Finished OPTICS: {}".format(round(time.time()-start_time, 2)))
     if False:
         debacl_clustering(data)
         print(":: Finished debacl: {}".format(round(time.time()-start_time, 2)))
