@@ -4,12 +4,9 @@ import matplotlib
 import matplotlib.pyplot as plt
 import os
 import sys
-# supplement
-# from tqdm import tqdm, tqdm_notebook
 import scipy.io as sio
 import glob2
-# tools
-# from tools import transform, visualize
+import getopt
 
 def translational(data, origin_bp):
     # data format: num_bp x num_coord x t
@@ -33,14 +30,14 @@ def rotational(data, axis_bp):
 def Rotate(data, angle):
     return np.einsum('ijk,jk ->ik', np.array([[np.cos(angle), -1*np.sin(angle)], [np.sin(angle), np.cos(angle)]]), data)
 
-def ajust_data(num_bp=30, origin_bp=2, axis_bp=1):
+def ajust_data(filepath, num_bp=30, origin_bp=2, axis_bp=1):
     # specified parameter
     # num_bp - number of body point labeled
     # origin_bp -  origin body point to center animal
     # axis_bp -  other body point to form an axis w/ origin body point
     # delete_bp - should always delete origin bp; can add other bp to list
 
-    data_path_list = glob2.glob('data/*')
+    data_path_list = glob2.glob(filepath+'/*')
     delete_bp=(origin_bp)
     total_frame = 0
     for data_path in data_path_list:
@@ -54,14 +51,9 @@ def ajust_data(num_bp=30, origin_bp=2, axis_bp=1):
         num_frame = bp_data.shape[0]
         bp_data = np.delete( bp_data.reshape( num_frame,num_bp,-1 ), obj=-1, axis=2 ) # reformats data and takes out last prob varaiable
         bp_data = np.swapaxes(bp_data.T,0,1) # num_bp x num_coord x t
-        # get camera position
-        # cam_path = glob2.glob(data_path+'/*.npy')[0]
-        # cam_data = np.load(cam_path)
         # translate data w/ respect to origin
-        # (bp_data, trans_data) = transform.translational(bp_data, origin_bp)
         (bp_data, trans_data) = translational(bp_data, origin_bp)
         # rotate data w/ respect to body axis
-        # (bp_data, rot_data) = transform.rotational(bp_data, axis_bp)
         (bp_data, rot_data) = rotational(bp_data, axis_bp)
         # visualize transformed body points
         # visualize.ant_bp_graph(bp_data, frame=600)
@@ -85,17 +77,41 @@ def ajust_data(num_bp=30, origin_bp=2, axis_bp=1):
         print("datapath: ", data_path)
         print("directory: ", dir_name)
         print("body point data: ", bp_data.shape)
-        # print("camera data: ", cam_data.shape)
         print("spectrogram data: ", bp_data_mod.shape)
         print("*********************************************")
         
     print("total number of frames: ", total_frame)
 
 if __name__ == '__main__':
-    if len(sys.argv) > 1:
-        num_bp, origin_bp, axis_bp=sys.argv[1], sys.argv[2], sys.argv[3]
-    else:
-        num_bp, origin_bp, axis_bp=30, 2, 1
-    ajust_data(num_bp, origin_bp, axis_bp)
+    # default values
+    num_bp, origin_bp, axis_bp = 30, 2, 1
+    # response for specific flags
+    if "-h" in sys.argv:
+        print("-f | file path to the data (REQUIRED)")
+        print("-b | number of bodypoint")
+        print("-o | origin of bodypoint index")
+        print("-a | axis body point w/ respect to origin")
+        sys.exit(2)
+    if "-f" not in sys.argv:
+        print(":: no filepath to data")
+        sys.exit(2)
+    # get flags and argument
+    try:
+        optlist, args = getopt.getopt(sys.argv[1:], 'f:b:o:a:')
+    except getopt.GetoptError as err:
+        print(err)
+        sys.exit(2)
+    for flag, arg in optlist:
+        if flag == "-f": 
+            if os.path.exists(arg):
+                filepath = arg
+            else:
+                print(":: filepath does not exist")
+                sys.exit(2)
+        elif flag == "-b": num_bp = arg
+        elif flag == "-o": origin_bp = arg
+        elif flag == "-1": axis_bp = arg
+    # modify data
+    ajust_data(filepath, num_bp, origin_bp, axis_bp)
 
     
