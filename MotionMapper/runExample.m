@@ -24,7 +24,7 @@ parameters.omega0 = 5;
 parameters.minF = 1;
 parameters.maxF = 25;
 parameters.maxNeighbors = 200; % MUST BE LESS THAN SAMPLE; previously 30
-parameters.perplexity = 32; % LESS THAN BERMAN'S 32; previously 28
+parameters.perplexity = 40; % LESS THAN BERMAN'S 32; previously 28
 
 numCoresString = getenv('SLURM_CPUS_PER_TASK');
 
