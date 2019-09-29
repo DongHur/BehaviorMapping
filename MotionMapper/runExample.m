@@ -1,4 +1,4 @@
-% parpool('local', str2num(getenv('SLURM_CPUS_PER_TASK')))
+parpool('local', str2num(getenv('SLURM_CPUS_PER_TASK')))
 clock
 %PLACE PATH TO FOLDER CONTAINING BODY POSITION HERE
 filePath = FILE_PATH
