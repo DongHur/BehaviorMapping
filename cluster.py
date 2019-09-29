@@ -15,6 +15,8 @@ import timeit
 from collections import Counter
 from tqdm import tqdm
 
+import plotly.graph_objects as go
+
 def collect_data(filepath, num_files=-1):
     data = None
     count = 0
@@ -119,15 +121,15 @@ def optimal_hdbscan(data, num_mcs=50, num_ms=40):
     print(perc_label)
     np.save("./num_cluster.npy", num_cluster)
     np.save("./perc_label.npy", perc_label)
-    if False:
+    if True:
         plt.figure("Optimal HDBSCAN Plane Number of Cluster")
-        plt.pcolormesh(XX, YY, num_cluster, cmap="jet")
+        plt.pcolormesh(XX, YY, num_cluster.T, cmap="jet")
         plt.title("Number of Cluster")
         plt.xlabel("min_cluster_size")
         plt.ylabel("min_samples")
-    if False:
+    if True:
         plt.figure("Optimal HDBSCAN Plane Percent Labelled")
-        plt.pcolormesh(XX, YY, perc_label, cmap="jet")
+        plt.pcolormesh(XX, YY, perc_label.T, cmap="jet")
         plt.title("Percent Labelled")
         plt.xlabel("min_cluster_size")
         plt.ylabel("min_samples")
@@ -136,7 +138,17 @@ def optimal_hdbscan(data, num_mcs=50, num_ms=40):
 def hdbscan_clustering(data, min_cluster_size=140, min_samples=30, plot_cluster=False, plot_cluster_noiseless=True, 
     plot_span_tree=False, plot_linkage_tree=False, plot_condense_tree=False):
     # data - [num_frames, num_dim]
-    clusterer = hdbscan.HDBSCAN(min_cluster_size=min_cluster_size, min_samples=min_samples, allow_single_cluster=False, gen_min_span_tree=True)
+    if min_samples is None:
+        clusterer = hdbscan.HDBSCAN(
+            min_cluster_size=min_cluster_size,
+            allow_single_cluster=False,
+            gen_min_span_tree=True)
+    else:
+        clusterer = hdbscan.HDBSCAN(
+            min_cluster_size=min_cluster_size,
+            min_samples=min_samples, 
+            allow_single_cluster=False,
+            gen_min_span_tree=True)
     clusterer.fit(data)
     # plot figures
     if plot_span_tree:
@@ -165,14 +177,18 @@ def hdbscan_clustering(data, min_cluster_size=140, min_samples=30, plot_cluster=
         plt.title("Labelled Scatter Plot")
         plt.xlabel("X1")
         plt.ylabel("X2")
-        plt.scatter(data[:,0], data[:,1], s=1.5, c=cluster_member_colors, alpha=0.3)
+        plt.scatter(data[:,0], data[:,1], s=1.5, c=cluster_member_colors)
     if plot_cluster_noiseless:
         plt.figure("Noiseless Labelled Scatter Plot")
         plt.title("Labelled Scatter Plot w/o Noise")
         plt.xlabel("X1")
         plt.ylabel("X2")
         idx = clusterer.labels_ != -1
-        plt.scatter(data[idx,0], data[idx,1], s=1.5, c=cluster_member_colors[idx], alpha=0.3)
+        plt.scatter(data[idx,0], data[idx,1], s=1.5, c=cluster_member_colors[idx])
+
+        fig = go.Figure(data=go.Scatter(x=data[idx,0], y=data[idx,1], 
+            mode='markers', text=clusterer.labels_[idx], marker=dict(color=clusterer.labels_[idx], opacity=0.2)))
+        fig.show()
     # plt.savefig(FIG_PATH+"Labelled Scatter Plot")
     return clusterer.labels_, clusterer.probabilities_ 
 
@@ -247,8 +263,7 @@ if __name__ == "__main__":
     # min_cluster_size, min_samples = 185, 28
     # Number of Clusters:  55
     # Points Classified: 79.77%
-    min_cluster_size=175 
-    min_samples=22 
+    min_cluster_size, min_samples = 250, 28
     plot_cluster, plot_cluster_noiseless = False, True
     plot_linkage_tree, plot_condense_tree = False, False
     plot_span_tree = False
@@ -274,7 +289,7 @@ if __name__ == "__main__":
         cluster_label, cluster_prob = hdbscan_clustering(data,  min_cluster_size, min_samples, plot_cluster, plot_cluster_noiseless,
             plot_span_tree, plot_linkage_tree, plot_condense_tree)
         print(":: Finished HDBSCAN: {}".format(round(time.time()-start_time, 2)))
-    if True:
+    if False:
         gaussian_conv(data)
         print(":: Finished Gausian Convolution: {}".format(round(time.time()-start_time, 2)))
     if False:

@@ -64,18 +64,6 @@ end
 %% Modify tSNE points
 total_tsne = cat(1,embeddingValues{:});
 bad_frames = [];
-% for i=1:length(total_tsne)
-%     if total_tsne(i,1) < -60
-%         % take out black screen points or zero body movement
-%         bad_frames = [bad_frames, i];
-%     elseif (total_tsne(i,1) < -10) && (total_tsne(i,2) < -10)
-%         % take out body frames with wrong body point
-%         bad_frames = [bad_frames, i];
-%     elseif (total_tsne(i,1) < 28) && (total_tsne(i,2) < -50)
-%         % take out body frames with wrong body point
-%         bad_frames = [bad_frames, i];
-%     end
-% end
 total_tsne(bad_frames,:) = [];
 disp("Finished Filtering Data");
 % setup density plot parameter
