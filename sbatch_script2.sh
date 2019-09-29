@@ -2,9 +2,9 @@
 #SBATCH -J pfor
 #SBATCH -c 30 # Number of cores requested
 #SBATCH -N 1 # Ensure that all cores are on one machine
-#SBATCH -t 120 # Runtime in minutes
+#SBATCH -t 24:0:0 # Runtime in minutes
 #SBATCH -p serial_requeue # Partition to submit to
-#SBATCH --mem=20G # Memory per cpu in MB (see also --mem-per-cpu)
+#SBATCH --mem=100G # Memory per cpu in MB (see also --mem-per-cpu)
 #SBATCH -o logs/myoutput_%j.out #Standard out goes to this file
 #SBATCH -e logs/myerr_%j.err # Standard err goes to this filehostname
 #SBATCH --mail-type=ALL
