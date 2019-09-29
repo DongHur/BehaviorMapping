@@ -14,4 +14,25 @@
 # 8 cores need at least 10G
 
 module load matlab/R2018b-fasrc01
-srun -c $SLURM_CPUS_PER_TASK matlab -nodisplay -nodesktop -nosplash -r "run('MotionMapper/runExample.m'); exit;"
+FILE_PATH='../data'
+SAMPLING_FREQ=50
+TRAINING_SET_SIZE=35000
+NUM_PERIODS=25
+OMEGA_0=5
+MIN_F=1
+MAX_F=25
+MAX_NEIGHBORS=200
+PERPLEXITY=40
+
+srun -c $SLURM_CPUS_PER_TASK matlab -nodisplay -nodesktop -nosplash -r \
+"FILE_PATH='$FILE_PATH'; \
+SAMPLING_FREQ=$SAMPLING_FREQ; \
+TRAINING_SET_SIZE=$TRAINING_SET_SIZE; \
+NUM_PERIODS=$NUM_PERIODS; \
+OMEGA_0=$OMEGA_0; \
+MIN_F=$MIN_F; \
+MAX_F=$MAX_F; \
+MAX_NEIGHBORS=$MAX_NEIGHBORS; \
+PERPLEXITY=$PERPLEXITY; \
+run('MotionMapper/runExample.m'); \
+exit;"

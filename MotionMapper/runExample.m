@@ -1,7 +1,7 @@
-parpool('local', str2num(getenv('SLURM_CPUS_PER_TASK')))
+% parpool('local', str2num(getenv('SLURM_CPUS_PER_TASK')))
 clock
 %PLACE PATH TO FOLDER CONTAINING BODY POSITION HERE
-filePath = '../data/'
+filePath = FILE_PATH
 
 %add utilities folder to path
 addpath(genpath('./utilities/'));
@@ -17,14 +17,23 @@ L = length(imageFiles);
 numZeros = ceil(log10(L+1e-10));
 
 %define any desired parameter changes here
-parameters.samplingFreq = 50;
-parameters.trainingSetSize = 35000; % previously 1000
-parameters.numPeriods = 25;
-parameters.omega0 = 5;
-parameters.minF = 1;
-parameters.maxF = 25;
-parameters.maxNeighbors = 200; % MUST BE LESS THAN SAMPLE; previously 30
-parameters.perplexity = 40; % LESS THAN BERMAN'S 32; previously 28
+% parameters.samplingFreq = 50;
+% parameters.trainingSetSize = 35000; % previously 1000
+% parameters.numPeriods = 25;
+% parameters.omega0 = 5;
+% parameters.minF = 1;
+% parameters.maxF = 25;
+% parameters.maxNeighbors = 200; % MUST BE LESS THAN SAMPLE; previously 30
+% parameters.perplexity = 40; % LESS THAN BERMAN'S 32; previously 28
+
+parameters.samplingFreq = SAMPLING_FREQ;
+parameters.trainingSetSize = TRAINING_SET_SIZE;
+parameters.numPeriods = NUM_PERIODS;
+parameters.omega0 = OMEGA_0;
+parameters.minF = MIN_F;
+parameters.maxF = MAX_F;
+parameters.maxNeighbors = MAX_NEIGHBORS;
+parameters.perplexity = PERPLEXITY;
 
 numCoresString = getenv('SLURM_CPUS_PER_TASK');
 
