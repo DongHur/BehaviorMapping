@@ -36,6 +36,12 @@ function [trainingSetData,trainingSetAmps,projectionFiles] = runEmbeddingSubSamp
     numPerDataSet = round(N/L);
     numModes = parameters.pcaModes;
     numPeriods = parameters.numPeriods;
+    
+    disp(projectionFiles)
+    fprintf(1,['Test' num2str(L) '\n']);
+    fprintf(1,['Test' num2str(numPerDataSet) '\n']);
+    fprintf(1,['Test' num2str(numModes) '\n']);
+    fprintf(1,['Test' num2str(numPeriods) '\n']);
      
     trainingSetData = zeros(numPerDataSet*L,numModes*numPeriods);
     trainingSetAmps = zeros(numPerDataSet*L,1);
