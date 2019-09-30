@@ -71,7 +71,7 @@ for i=1:L
     embed_values_i = embeddingValues{i}
     dir_part = strsplit(string(imageFiles{i}), '/');
     num_arg = dir_part.length-1
-    save([join(dir_part(1:num_arg),'/')'/EMBED.mat'], 'embed_values_i');
+    save([join(dir_part(1:num_arg),'/') '/EMBED.mat'], 'embed_values_i');
     clear projections
 end
 
