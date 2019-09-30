@@ -1,4 +1,4 @@
-parpool('local', str2num(getenv('SLURM_CPUS_PER_TASK')))
+% parpool('local', str2num(getenv('SLURM_CPUS_PER_TASK')))
 clock
 %PLACE PATH TO FOLDER CONTAINING BODY POSITION HERE
 filePath = FILE_PATH
@@ -70,7 +70,8 @@ for i=1:L
     % save corresponding files data
     embed_values_i = embeddingValues{i}
     dir_part = strsplit(string(imageFiles{i}), '/');
-    save([dir_part{1} '/' dir_part{2} '/' dir_part{3} '/EMBED.mat'], 'embed_values_i');
+    num_arg = dir_part.length-1
+    save([join(dir_part(1:num_arg),'/')'/EMBED.mat'], 'embed_values_i');
     clear projections
 end
 
