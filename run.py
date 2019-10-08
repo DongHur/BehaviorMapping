@@ -13,14 +13,17 @@ def translational(data, origin_bp):
     # origin_bp - specifies which body point to make the origin
     return ( np.copy(data - data[origin_bp,:,:]), np.copy(data[origin_bp,:,:]) )
 
-def rotational(data, axis_bp):
+def rotational(data, axis_bp, align_to_posY=True):
     # rotate axis to be vertical; only works with 2 dimensions as of right now
     # data format: num_bp x (X_coord, Y_coord) x t
     # angle_list: angle of rotation from the vertical per frame
     rot_data = np.copy(data)
     num_bp = rot_data.shape[0]
     axis_vector = rot_data[axis_bp,:,:]
-    angle_list = np.sign(axis_vector[0,:]) * np.pi/2 - np.arctan( axis_vector[1,:]/axis_vector[0,:] ) # angle rotated per frame
+    if align_to_posY:
+        angle_list = np.sign(axis_vector[0,:]) * np.pi/2 - np.arctan( axis_vector[1,:]/axis_vector[0,:] ) # angle rotated per frame
+    else:
+        angle_list = -1*np.sign(axis_vector[0,:]) * np.pi/2 - np.arctan( axis_vector[1,:]/axis_vector[0,:] ) # angle rotated per frame
     # rotate each body point
     for i in range(num_bp):
         rot_data[i,:,:] = Rotate(rot_data[i,:,:], angle_list)
@@ -30,7 +33,7 @@ def rotational(data, axis_bp):
 def Rotate(data, angle):
     return np.einsum('ijk,jk ->ik', np.array([[np.cos(angle), -1*np.sin(angle)], [np.sin(angle), np.cos(angle)]]), data)
 
-def ajust_data(filepath, num_bp=30, origin_bp=2, axis_bp=1):
+def ajust_data(filepath, num_bp=30, origin_bp=2, axis_bp=1, align_to_posY=True):
     # specified parameter
     # num_bp - number of body point labeled
     # origin_bp -  origin body point to center animal
@@ -45,8 +48,12 @@ def ajust_data(filepath, num_bp=30, origin_bp=2, axis_bp=1):
         
         # convert body point h5 to numpy
         bp_path = glob2.glob(data_path+'/*.h5')[0]
-        bp_h5data = pd.read_hdf(bp_path)
-        bp_data = bp_h5data[ bp_h5data.keys().levels[0][0] ].values # converts h5 to npy
+        # bp_h5data = pd.read_hdf(bp_path)
+        store = pd.HDFStore(bp_path)
+        df = store['/df_with_missing']
+        # bp_data = bp_h5data[ bp_h5data.keys().levels[0][0] ].values # converts h5 to npy
+        bp_data = df.to_numpy()
+        store.close()
         # reformat numpy body point data
         num_frame = bp_data.shape[0]
         bp_data = np.delete( bp_data.reshape( num_frame,num_bp,-1 ), obj=-1, axis=2 ) # reformats data and takes out last prob varaiable
@@ -54,7 +61,7 @@ def ajust_data(filepath, num_bp=30, origin_bp=2, axis_bp=1):
         # translate data w/ respect to origin
         (bp_data, trans_data) = translational(bp_data, origin_bp)
         # rotate data w/ respect to body axis
-        (bp_data, rot_data) = rotational(bp_data, axis_bp)
+        (bp_data, rot_data) = rotational(bp_data, axis_bp, align_to_posY)
         # visualize transformed body points
         # visualize.ant_bp_graph(bp_data, frame=600)
         
@@ -87,17 +94,18 @@ if __name__ == '__main__':
     num_bp, origin_bp, axis_bp = 30, 2, 1
     # response for specific flags
     if "-h" in sys.argv:
-        print("-f | file path to the data (REQUIRED)")
+        print("-f | file path to the deeplabcut folder(REQUIRED)")
         print("-b | number of bodypoint")
         print("-o | origin of bodypoint index")
         print("-a | axis body point w/ respect to origin")
+        print("-y | align to positive y axis (True/False)")
         sys.exit(2)
     if "-f" not in sys.argv:
         print(":: no filepath to data")
         sys.exit(2)
     # get flags and argument
     try:
-        optlist, args = getopt.getopt(sys.argv[1:], 'f:b:o:a:')
+        optlist, args = getopt.getopt(sys.argv[1:], 'f:b:o:a:y')
     except getopt.GetoptError as err:
         print(err)
         sys.exit(2)
@@ -108,10 +116,15 @@ if __name__ == '__main__':
             else:
                 print(":: filepath does not exist")
                 sys.exit(2)
-        elif flag == "-b": num_bp = arg
-        elif flag == "-o": origin_bp = arg
-        elif flag == "-1": axis_bp = arg
+        elif flag == "-b": num_bp = int(arg)
+        elif flag == "-o": origin_bp = int(arg)
+        elif flag == "-a": axis_bp = int(arg)
+        elif flag == "-y": align_to_posY = bool(arg)
+    print("Number of Bodypoint: ", num_bp)
+    print("Origin Bodypoint: ", origin_bp)
+    print("Axis Bodypoint: ", axis_bp)
+    print("Align to Positive Y: ", align_to_posY)
     # modify data
-    ajust_data(filepath, num_bp, origin_bp, axis_bp)
+    ajust_data(filepath, num_bp, origin_bp, axis_bp, align_to_posY)
 
     
