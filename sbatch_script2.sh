@@ -14,9 +14,10 @@
 # 8 cores need at least 10G
 
 module load matlab/R2018b-fasrc01
-FILE_PATH='/Users/donghur/Desktop/Research/Murthy/BehaviorMapping/data_test'
+FILE_PATH='../data/param4'
+
 SAMPLING_FREQ=50
-TRAINING_SET_SIZE=35000
+TRAINING_SET_SIZE=50000
 NUM_PERIODS=25
 OMEGA_0=5
 MIN_F=1
