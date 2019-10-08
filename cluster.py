@@ -5,6 +5,7 @@ from sklearn.cluster import KMeans, DBSCAN
 from sklearn.neighbors import KernelDensity
 from sklearn.model_selection import GridSearchCV
 from sklearn.neighbors import NearestNeighbors
+from sklearn.mixture import GaussianMixture, BayesianGaussianMixture
 import seaborn as sns
 import hdbscan
 import os
@@ -100,42 +101,54 @@ def histogram(data, num_bins=50):
 
 # https://towardsdatascience.com/lightning-talk-clustering-with-hdbscan-d47b83d1b03a
 # https://umap-learn.readthedocs.io/en/latest/clustering.html
-def optimal_hdbscan(data, num_mcs=50, num_ms=40):
-    print(data.shape)
-    mcs_list = np.linspace(10,300,num_mcs, dtype=int)
+def optimal_hdbscan(data, num_mcs=20, num_ms=20):
+    (num_data, num_dim) = data.shape
+    mcs_list = np.linspace(10,110,num_mcs, dtype=int)
     ms_list = np.linspace(5,70,num_ms, dtype=int)
+    # mcs_list = np.linspace(80,90,num_mcs, dtype=int)
+    # ms_list = np.linspace(31,38,num_ms, dtype=int)
     XX, YY = np.meshgrid(mcs_list, ms_list)
     # compute hdbscan result
-    num_cluster=np.zeros((num_mcs, num_ms))
-    perc_label=np.zeros((num_mcs, num_ms))
-    for mcs_i, mcs in tqdm(enumerate(mcs_list)):
+    BIC = np.zeros((num_mcs, num_ms))
+    for mcs_i, mcs in enumerate(tqdm(mcs_list)):
         for ms_i, ms in enumerate(ms_list):
             clusterer = hdbscan.HDBSCAN(
                 min_cluster_size=int(mcs), 
                 min_samples=int(ms), 
                 allow_single_cluster=False)
             clusterer.fit(data)
-            num_cluster[mcs_i, ms_i] = int(clusterer.labels_.max()+1)
-            perc_label[mcs_i, ms_i] = 100*len(np.where(clusterer.labels_!=-1)[0])/len(clusterer.labels_)
-    print(num_cluster)
-    print(perc_label)
-    np.save("./num_cluster.npy", num_cluster)
-    np.save("./perc_label.npy", perc_label)
+            # compute Bayesian Information Criterion
+            prob = clusterer.probabilities_
+            # prob[prob==0] = 0.1
+            prob = prob[prob!=0]
+            num_pts = len(prob)
+            num_cluster = int(clusterer.labels_.max()+1)
+            nat_L = np.log(prob).sum()
+            print("********")
+            print(nat_L)
+            print(num_pts)
+            print(num_cluster)
+            print(num_dim)
+            BIC[mcs_i, ms_i] = np.log(num_pts)*num_cluster*num_dim - 2*nat_L
+    ind = np.unravel_index(np.argmin(data), data.shape)
+    print("Optimal mcs: ", ind[0])
+    print("Optimal ms: ", ind[1])
+  
+    # np.save("./num_cluster.npy", num_cluster)
+    np.save("./BIC_2.npy", BIC)
     if True:
-        plt.figure("Optimal HDBSCAN Plane Number of Cluster")
-        plt.pcolormesh(XX, YY, num_cluster.T, cmap="jet")
-        plt.title("Number of Cluster")
-        plt.xlabel("min_cluster_size")
-        plt.ylabel("min_samples")
-    if True:
-        plt.figure("Optimal HDBSCAN Plane Percent Labelled")
-        plt.pcolormesh(XX, YY, perc_label.T, cmap="jet")
-        plt.title("Percent Labelled")
-        plt.xlabel("min_cluster_size")
-        plt.ylabel("min_samples")
+        # plt.figure("Optimal HDBSCAN Using BIC")
+        # im = plt.pcolormesh(XX, YY, BIC.T, cmap="jet")
+        # plt.title("BIC")
+        # plt.xlabel("min_cluster_size")
+        # plt.ylabel("min_samples")
+        # fig.colorbar(im, ax=ax0)
+
+        fig = go.Figure(data=go.Heatmap(z=BIC.T, x=mcs_list,y=ms_list))
+        fig.show()
     pass
 
-def hdbscan_clustering(data, min_cluster_size=140, min_samples=30, plot_cluster=False, plot_cluster_noiseless=True, 
+def hdbscan_clustering(data, min_cluster_size=10, min_samples=65, plot_cluster=False, plot_cluster_noiseless=True, 
     plot_span_tree=False, plot_linkage_tree=False, plot_condense_tree=False):
     # data - [num_frames, num_dim]
     if min_samples is None:
@@ -192,6 +205,60 @@ def hdbscan_clustering(data, min_cluster_size=140, min_samples=30, plot_cluster=
     # plt.savefig(FIG_PATH+"Labelled Scatter Plot")
     return clusterer.labels_, clusterer.probabilities_ 
 
+def gmm_opt(data):
+    n_list = np.arange(3,150)
+    score_list = np.zeros(len(n_list))
+    for idx, n_components in tqdm(enumerate(n_list)):
+        gmm = GaussianMixture(n_components)
+        gmm.fit(data)
+        score_list[idx] = gmm.bic(data)
+    np.save("GMM_BIC.npy", score_list)
+    if True:
+        plt.figure("GMM BIC")
+        plt.xlabel("Number of Components")
+        plt.ylabel("BIC (Bayesian Information Criterion)")
+        plt.title("BIC")
+        plt.plot(n_list, score_list)
+    pass
+def gmm_clustering(data, n_components=40):
+    print(data.shape)
+    gmm = GaussianMixture(n_components)
+    gmm.fit(data)
+    print(gmm.weights_)
+    label = gmm.predict(data)
+    print(label)
+    print(np.max(gmm.predict_proba(data), axis=1).shape)
+    # format cluster color
+    color_palette = sns.color_palette('hls', n_components)
+    cluster_colors = [color_palette[x] for x in label]
+    # cluster_member_colors = np.array([sns.desaturate(x, p) for x, p in zip(cluster_colors, np.max(gmm.predict_proba(data), axis=1))])
+    cluster_member_colors = np.array([(x[0],x[1],x[2],p*0.1) for x, p in zip(cluster_colors, np.max(gmm.predict_proba(data), axis=1))])
+
+    print(gmm.score(data))
+    if True:
+        plt.figure("GMM Clustering")
+        plt.title("GMM Clustering")
+        plt.xlabel("X1")
+        plt.ylabel("X2")
+        plt.scatter(data[:,0],data[:,1], s=1.5, c=cluster_member_colors)
+    pass
+def bgmm_clustering(data, n_components=80, weight_concentration_prior=1e-2):
+    bgmm = BayesianGaussianMixture(n_components=50, weight_concentration_prior=0.1)
+    bgmm.fit(data)
+    label = bgmm.predict(data)
+    print("Number of Cluster: ", label.max())
+    # print(bgmm.predict_proba(data))
+    # format cluster color
+    color_palette = sns.color_palette('hls', n_components)
+    cluster_colors = [color_palette[x] for x in label]
+    # cluster_member_colors = np.array([sns.desaturate(x, p) for x, p in zip(cluster_colors, clusterer.probabilities_)])
+    if True:
+        plt.figure("GMM Clustering")
+        plt.title("GMM Clustering")
+        plt.xlabel("X1")
+        plt.ylabel("X2")
+        plt.scatter(data[:,0],data[:,1], s=1.5, c=cluster_colors)
+    pass
 def gaussian_conv(data, k_nearest=5, num_points=250, plot_kernel=False, plot_hist=False, plot_conv=True):
     # data - [num_frames, num_dim]
     # knn computation
@@ -243,8 +310,6 @@ def gaussian_conv(data, k_nearest=5, num_points=250, plot_kernel=False, plot_his
 def save_clusters(label, prob, file_info):
     idx = 0
     for key, value in file_info.items():
-        # print(key)
-        # print(value)
         np.save(key+"/cluster.npy", label[idx:idx+value])
         idx += value
     pass
@@ -255,15 +320,7 @@ if __name__ == "__main__":
     data, file_info = collect_data(filepath)
     start_time = time.time()
     # *** HDBSCAN Parameter ***
-    # old data
-    # min_cluster_size, min_samples = 185, 28
-    # Number of Clusters:  55
-    # Points Classified: 79.77%
-    # new data
-    # min_cluster_size, min_samples = 185, 28
-    # Number of Clusters:  55
-    # Points Classified: 79.77%
-    min_cluster_size, min_samples = 250, 28
+    min_cluster_size, min_samples = 86, 32 # 86, 32 MOST OPTIMAL Number of Clusters:137 Points Classified: 51.23%
     plot_cluster, plot_cluster_noiseless = False, True
     plot_linkage_tree, plot_condense_tree = False, False
     plot_span_tree = False
@@ -290,9 +347,16 @@ if __name__ == "__main__":
             plot_span_tree, plot_linkage_tree, plot_condense_tree)
         print(":: Finished HDBSCAN: {}".format(round(time.time()-start_time, 2)))
     if False:
+        gmm_opt(data)
+        print(":: Finished GMM Optimization: {}".format(round(time.time()-start_time, 2)))
+    if False:
+        bgmm_clustering(data)
+        # gmm_clustering(data)
+        print(":: Finished GMM Clustering: {}".format(round(time.time()-start_time, 2)))
+    if False:
         gaussian_conv(data)
         print(":: Finished Gausian Convolution: {}".format(round(time.time()-start_time, 2)))
-    if False:
+    if True:
         save_clusters(cluster_label, cluster_prob, file_info)
         print(":: Finished Saving Cluster: {}".format(round(time.time()-start_time, 2)))
     plt.show()
