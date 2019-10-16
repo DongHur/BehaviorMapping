@@ -316,7 +316,7 @@ def save_clusters(label, prob, file_info):
 
 if __name__ == "__main__":
     # filepath = "./data"
-    filepath = "./data_result/data_final"
+    filepath = "./data_result/rat_test_data"
     data, file_info = collect_data(filepath)
     start_time = time.time()
     # *** HDBSCAN Parameter ***
@@ -356,7 +356,7 @@ if __name__ == "__main__":
     if False:
         gaussian_conv(data)
         print(":: Finished Gausian Convolution: {}".format(round(time.time()-start_time, 2)))
-    if True:
+    if False:
         save_clusters(cluster_label, cluster_prob, file_info)
         print(":: Finished Saving Cluster: {}".format(round(time.time()-start_time, 2)))
     plt.show()

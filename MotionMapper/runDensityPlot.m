@@ -5,7 +5,7 @@ addpath(genpath('./segmentation_alignment/'));
 addpath(genpath('./t_sne/'));
 addpath(genpath('./wavelet/'));
 %% Load Data
-path = '../data_result/data_final/**/EMBED.mat';
+path = '../data_result/rat_test_data/**/EMBED.mat';
 %get data for each file
 EMBED_filepath = dir(path);
 file_info = struct2cell(EMBED_filepath);
