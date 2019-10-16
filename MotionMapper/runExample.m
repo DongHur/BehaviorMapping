@@ -34,6 +34,7 @@ parameters.minF = MIN_F;
 parameters.maxF = MAX_F;
 parameters.maxNeighbors = MAX_NEIGHBORS;
 parameters.perplexity = PERPLEXITY;
+parameters.pcaModes = 22; % CHANGE THIS LATER; ONLY THE CASE FOR RAT
 
 numCoresString = getenv('SLURM_CPUS_PER_TASK');
 

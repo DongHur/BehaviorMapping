@@ -5,14 +5,17 @@ def translational(data, origin_bp):
     # origin_bp - specifies which body point to make the origin
     return ( np.copy(data - data[origin_bp,:,:]), np.copy(data[origin_bp,:,:]) )
 
-def rotational(data, axis_bp):
+def rotational(data, axis_bp, align_to_posY=True):
     # rotate axis to be vertical; only works with 2 dimensions as of right now
     # data format: num_bp x (X_coord, Y_coord) x t
     # angle_list: angle of rotation from the vertical per frame
     rot_data = np.copy(data)
     num_bp = rot_data.shape[0]
     axis_vector = rot_data[axis_bp,:,:]
-    angle_list = np.sign(axis_vector[0,:]) * np.pi/2 - np.arctan( axis_vector[1,:]/axis_vector[0,:] ) # angle rotated per frame
+    if align_to_posY:
+        angle_list = np.sign(axis_vector[0,:]) * np.pi/2 - np.arctan( axis_vector[1,:]/axis_vector[0,:] ) # angle rotated per frame
+    else:
+        angle_list = -1*np.sign(axis_vector[0,:]) * np.pi/2 - np.arctan( axis_vector[1,:]/axis_vector[0,:] ) # angle rotated per frame
     # rotate each body point
     for i in range(num_bp):
         rot_data[i,:,:] = Rotate(rot_data[i,:,:], angle_list)
