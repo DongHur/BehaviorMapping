@@ -33,7 +33,6 @@ function [templates,xx,density,sigma,lengths,L,vals2] = ...
     N = length(D(:,1));
     watershedValues = zeros(N,1);
     for i=1:N
-        fprintf(1, strcat("Test3: ", num2str(i), '\n'));
         watershedValues(i) = diag(L(vals(i,2),vals(i,1)));
     end
     
