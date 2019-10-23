@@ -73,8 +73,8 @@ for i=1:L
     dir_part = strsplit(string(imageFiles{i}), '/');
     num_arg = dir_part.length-1;
     save(strcat(join(dir_part(1:num_arg),'/'),'/EMBED.mat'), 'embed_values_i');
-    clear projections;
-    clear embed_values_i;
+    clear projections
+    clear embed_values_i
 end
 
 delete(gcp);
