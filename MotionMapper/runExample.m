@@ -69,11 +69,12 @@ for i=1:L
     projections = projections(:,1:parameters.pcaModes);
     [embeddingValues{i},~] = findEmbeddings(projections,trainingSetData,trainingEmbedding,parameters);
     % save corresponding files data
-    embed_values_i = embeddingValues{i}
+    embed_values_i = embeddingValues{i};
     dir_part = strsplit(string(imageFiles{i}), '/');
-    num_arg = dir_part.length-1
+    num_arg = dir_part.length-1;
     save(strcat(join(dir_part(1:num_arg),'/'),'/EMBED.mat'), 'embed_values_i');
-    clear projections
+    clear projections;
+    clear embed_values_i;
 end
 
 delete(gcp);

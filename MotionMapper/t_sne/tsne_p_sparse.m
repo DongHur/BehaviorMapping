@@ -142,7 +142,7 @@ function [ydata,errors] = tsne_p_sparse(P, parameters, no_dims, relTol)
         % Print out progress
         if ~rem(iter, readout)
             
-            disp(['Iteration ' num2str(iter) ': error is ' num2str(cost) ,', change is ' num2str(diffVal)]);
+%             disp(['Iteration ' num2str(iter) ': error is ' num2str(cost) ,', change is ' num2str(diffVal)]);
             
             if isfield(parameters,'signalLabels')
                 if length(ydata(1,:)) == 2

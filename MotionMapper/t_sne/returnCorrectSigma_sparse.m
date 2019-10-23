@@ -46,7 +46,7 @@ function [sigma,p] = returnCorrectSigma_sparse(ds,perplexity,tol,maxNeighbors)
         idx = p>0;
         H = sum(-p(idx).*log(p(idx))./log(2));
         P = 2^H;
-        fprintf(1, "%4i \n", abs(P-perplexity))
+%         fprintf(1, "%4i \n", abs(P-perplexity))
         if abs(P-perplexity) < tol
             test = false;
         end
