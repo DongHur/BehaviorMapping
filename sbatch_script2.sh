@@ -14,7 +14,7 @@
 # 8 cores need at least 10G
 
 module load matlab/R2018b-fasrc01
-FILE_PATH='../data/rat_data'
+FILE_PATH='../data/MouseData2'
 SAMPLING_FREQ=30
 TRAINING_SET_SIZE=50000
 NUM_PERIODS=25
